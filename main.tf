@@ -74,6 +74,8 @@ resource "google_cloud_run_v2_service" "backend" {
   location = "europe-west3"
 
   template {
+    service_account = data.google_service_account.sa_account.email
+    
     containers {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
 
@@ -110,14 +112,14 @@ resource "google_cloud_run_v2_service_iam_binding" "public_acess" {
   ]
 }
 
-data "google_project" "project" {}
+data "google_service_account" "sa_account" {
+  account_id = "ringsatranarvi-sa"
+}
 
-resource "google_secret_manager_secret_iam_binding" "allow_cloud_run_db" {
+resource "google_secret_manager_secret_iam_member" "allow_cloud_run_db" {
   secret_id = google_secret_manager_secret.db_password.secret_id
   role      = "roles/secretmanager.secretAccessor"
-  members   = [
-    "serviceAccount:service-${data.google_project.project.number}@serverless-robot-prod.iam.gserviceaccount.com"
-  ]
+  member   = "serviceAccount:${data.google_service_account.sa_account.email}"
 }
 
 # ==========================================
