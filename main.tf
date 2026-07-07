@@ -75,7 +75,7 @@ resource "google_cloud_run_v2_service" "backend" {
 
   template {
     service_account = data.google_service_account.sa_account.email
-    
+
     containers {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
 
@@ -113,7 +113,7 @@ resource "google_cloud_run_v2_service_iam_binding" "public_acess" {
 }
 
 data "google_service_account" "sa_account" {
-  account_id = "ringsatranarvi-sa"
+  account_id = "ringsatranarvi-default"
 }
 
 resource "google_secret_manager_secret_iam_member" "allow_cloud_run_db" {
