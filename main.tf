@@ -110,7 +110,7 @@ resource "google_cloud_run_v2_service_iam_binding" "public_acess" {
   ]
 }
 
-data "goggle_project" "project" {}
+data "google_project" "project" {}
 
 resource "google_secret_manager_secret_iam_binding" "allow_cloud_run_db" {
   secret_id = google_secret_manager_secret.db_password.secret_id
