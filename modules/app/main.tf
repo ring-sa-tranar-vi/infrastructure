@@ -125,7 +125,7 @@ resource "google_project_service" "firebase" {
   disable_on_destroy = false
 }
 
-resource "google_firebase_project" "firebase_project" {
+resource "google_firebase_project" "default" {
   provider = google-beta
   project = var.project_id
   depends_on = [google_project_service.firebase]
