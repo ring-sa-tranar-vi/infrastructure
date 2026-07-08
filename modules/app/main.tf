@@ -6,15 +6,15 @@ terraform {
   required_version = ">= 1.0"
   required_providers {
     google = {
-      source = "hashicorp/google"
+      source  = "hashicorp/google"
       version = "~> 7.0"
     }
     random = {
-      source = "hashicorp/random"
+      source  = "hashicorp/random"
       version = "~> 3.0"
     }
     google-beta = {
-      source = "hashicorp/google-beta"
+      source  = "hashicorp/google-beta"
       version = "~> 7.0"
     }
   }
@@ -64,7 +64,7 @@ resource "google_secret_manager_secret" "ai_api_key" {
 # ==========================================
 
 resource "google_cloud_run_v2_service" "backend" {
-  name = "${var.environment}-backend-service"
+  name     = "${var.environment}-backend-service"
   location = var.backend_location
 
   template {
@@ -98,12 +98,10 @@ resource "google_cloud_run_v2_service" "backend" {
 }
 
 resource "google_cloud_run_v2_service_iam_binding" "public_acess" {
-  name = google_cloud_run_v2_service.backend.name
+  name     = google_cloud_run_v2_service.backend.name
   location = google_cloud_run_v2_service.backend.location
-  role    = "roles/run.invoker"
-  members = [
-    "allUsers",
-  ]
+  role     = "roles/run.invoker"
+  members  = ["allUsers"]
 }
 
 data "google_service_account" "sa_account" {
@@ -113,7 +111,7 @@ data "google_service_account" "sa_account" {
 resource "google_secret_manager_secret_iam_member" "allow_cloud_run_db" {
   secret_id = google_secret_manager_secret.db_password.secret_id
   role      = "roles/secretmanager.secretAccessor"
-  member   = "serviceAccount:${data.google_service_account.sa_account.email}"
+  member    = "serviceAccount:${data.google_service_account.sa_account.email}"
 }
 
 # ==========================================
@@ -121,21 +119,38 @@ resource "google_secret_manager_secret_iam_member" "allow_cloud_run_db" {
 # ==========================================
 
 resource "google_project_service" "firebase" {
-  service = "firebase.googleapis.com"
+  service            = "firebase.googleapis.com"
   disable_on_destroy = false
 }
 
 resource "google_firebase_project" "default" {
-  provider = google-beta
-  project = var.project_id
+  provider   = google-beta
+  project    = var.project_id
   depends_on = [google_project_service.firebase]
 }
 
 resource "google_firebase_hosting_site" "frontend" {
-  provider = google-beta
-  project = var.project_id
-  site_id = "${var.environment}-frontend-app"
+  provider   = google-beta
+  project    = var.project_id
+  site_id    = "${var.environment}-frontend-app"
   depends_on = [google_firebase_project.default]
+}
+
+# ==========================================
+# ARTIFACT REGISTRY REPOSITORY
+# ==========================================
+
+data "google_artifact_registry_repository" "shared_repo" {
+  location      = var.default_region
+  repository_id = "ringsatranarvi-shared-repo"
+}
+
+resource "google_artifact_registry_repository_iam_member" "allow_cloud_run_pull" {
+  project    = data.google_artifact_registry_repository.shared_repo.project
+  location   = data.google_artifact_registry_repository.shared_repo.location
+  repository = data.google_artifact_registry_repository.shared_repo.repository_id
+  role       = "roles/artifactregistry.reader"
+  member     = "serviceAccount:${data.google_service_account.sa_account.email}"
 }
 
 # ==========================================
