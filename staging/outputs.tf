@@ -11,9 +11,3 @@ output "neon_username" {
   value       = module.app.GENERATED_NEON_USERNAME
   description = "NEON username for Staging"
 }
-
-output "neon_password" {
-  value       = module.app.GENERATED_NEON_PASSWORD
-  sensitive   = true
-  description = "NEON password for Staging"
-}
