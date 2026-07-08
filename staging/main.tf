@@ -1,8 +1,18 @@
 terraform {
   backend "gcs" {
-    bucket = var.terraform_state_bucket
-    prefix = "${var.terraform_state_prefix}/staging"
+    bucket = "ringsatranarvi-terraform-state"
+    prefix = "terraform/state/staging"
   }
+}
+
+provider "google" {
+  project = "ringsatranarvi"
+  region  = "europe-north2"
+}
+
+provider "google-beta" {
+  project = "ringsatranarvi"
+  region  = "europe-north2"
 }
 
 module "app" {
