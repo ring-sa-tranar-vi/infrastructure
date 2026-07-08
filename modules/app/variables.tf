@@ -39,15 +39,3 @@ variable "service_account_id" {
   type        = string
   default     = "ringsatranarvi-default"
 }
-
-variable "terraform_state_bucket" {
-  description = "GCS bucket for Terraform state"
-  type        = string
-  default     = "ringsatranarvi-terraform-state"
-}
-
-variable "terraform_state_prefix" {
-  description = "GCS prefix for Terraform state"
-  type        = string
-  default     = "terraform/state"
-}
