@@ -13,12 +13,11 @@ terraform {
       source = "hashicorp/random"
       version = "~> 3.0"
     }
+    google-beta = {
+      source = "hashicorp/google-beta"
+      version = "~> 7.0"
+    }
   }
-}
-
-provider "google" {
-  project = var.project_id
-  region = var.default_region
 }
 
 # ==========================================
@@ -115,4 +114,35 @@ resource "google_secret_manager_secret_iam_member" "allow_cloud_run_db" {
   secret_id = google_secret_manager_secret.db_password.secret_id
   role      = "roles/secretmanager.secretAccessor"
   member   = "serviceAccount:${data.google_service_account.sa_account.email}"
+}
+
+# ==========================================
+# FRONTEND FIREBASE HOSTING
+# ==========================================
+
+resource "google_project_service" "firebase" {
+  service = "firebase.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_firebase_project" "firebase_project" {
+  provider = google-beta
+  project = var.project_id
+  depends_on = [google_project_service.firebase]
+}
+
+resource "google_firebase_hosting_site" "frontend" {
+  provider = google-beta
+  project = var.project_id
+  site_id = "${var.environment}-frontend-app"
+  depends_on = [google_firebase_project.default]
+}
+
+# ==========================================
+# OUTPUTS
+# ==========================================
+
+output "FRONTEND_URL" {
+  value       = "https://${google_firebase_hosting_site.frontend.default_url}"
+  description = "Frontend Firebase Hosting URL"
 }
