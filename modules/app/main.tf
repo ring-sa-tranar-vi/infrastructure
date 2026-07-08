@@ -143,7 +143,7 @@ resource "google_firebase_hosting_site" "frontend" {
 # ==========================================
 
 output "FRONTEND_URL" {
-  value       = "https://${google_firebase_hosting_site.frontend.default_url}"
+  value       = google_firebase_hosting_site.frontend.default_url
   description = "Frontend Firebase Hosting URL"
 }
 
