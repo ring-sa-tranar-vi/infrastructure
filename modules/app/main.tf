@@ -13,17 +13,11 @@ terraform {
       source = "hashicorp/random"
       version = "~> 3.0"
     }
+    google-beta = {
+      source = "hashicorp/google-beta"
+      version = "~> 7.0"
+    }
   }
-
-  backend "gcs" {
-    bucket = "ringsatranarvi-terraform-state"
-    prefix = "terraform/state"
-  }
-}
-
-provider "google" {
-  project = "ringsatranarvi"
-  region = "europe-west3"
 }
 
 # ==========================================
@@ -47,7 +41,7 @@ resource "random_password" "db_password" {
 # ==========================================
 
 resource "google_secret_manager_secret" "db_password" {
-  secret_id = "neon-db-password"
+  secret_id = "${var.environment}-neon-db-password"
   replication {
     auto {}
   }
@@ -70,8 +64,8 @@ resource "google_secret_manager_secret" "ai_api_key" {
 # ==========================================
 
 resource "google_cloud_run_v2_service" "backend" {
-  name = "backend-service"
-  location = "europe-west3"
+  name = "${var.environment}-backend-service"
+  location = var.backend_location
 
   template {
     service_account = data.google_service_account.sa_account.email
@@ -81,8 +75,8 @@ resource "google_cloud_run_v2_service" "backend" {
 
       resources {
         limits = {
-          memory = "512Mi"
-          cpu    = "1"
+          memory = var.cloud_run_memory
+          cpu    = var.cloud_run_cpu
         }
       }
 
@@ -113,7 +107,7 @@ resource "google_cloud_run_v2_service_iam_binding" "public_acess" {
 }
 
 data "google_service_account" "sa_account" {
-  account_id = "ringsatranarvi-default"
+  account_id = var.service_account_id
 }
 
 resource "google_secret_manager_secret_iam_member" "allow_cloud_run_db" {
@@ -123,16 +117,32 @@ resource "google_secret_manager_secret_iam_member" "allow_cloud_run_db" {
 }
 
 # ==========================================
-# OUTPUTS (ATT KOPIERA TILL NEON)
+# FRONTEND FIREBASE HOSTING
 # ==========================================
 
-output "GENERATED_NEON_USERNAME" {
-  value       = "app_user_${random_string.db_username.result}"
-  description = "NEON username"
+resource "google_project_service" "firebase" {
+  service = "firebase.googleapis.com"
+  disable_on_destroy = false
 }
 
-output "GENERATED_NEON_PASSWORD" {
-  value       = random_password.db_password.result
-  sensitive   = true
-  description = "NEON password"
+resource "google_firebase_project" "firebase_project" {
+  provider = google-beta
+  project = var.project_id
+  depends_on = [google_project_service.firebase]
+}
+
+resource "google_firebase_hosting_site" "frontend" {
+  provider = google-beta
+  project = var.project_id
+  site_id = "${var.environment}-frontend-app"
+  depends_on = [google_firebase_project.default]
+}
+
+# ==========================================
+# OUTPUTS
+# ==========================================
+
+output "FRONTEND_URL" {
+  value       = "https://${google_firebase_hosting_site.frontend.default_url}"
+  description = "Frontend Firebase Hosting URL"
 }
