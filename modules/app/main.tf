@@ -151,9 +151,3 @@ output "GENERATED_NEON_USERNAME" {
   value       = "app_user_${random_string.db_username.result}"
   description = "NEON username"
 }
-
-output "GENERATED_NEON_PASSWORD" {
-  value       = random_password.db_password.result
-  sensitive   = true
-  description = "NEON password"
-}
