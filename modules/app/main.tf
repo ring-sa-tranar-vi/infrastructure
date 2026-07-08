@@ -14,16 +14,11 @@ terraform {
       version = "~> 3.0"
     }
   }
-
-  backend "gcs" {
-    bucket = "ringsatranarvi-terraform-state"
-    prefix = "terraform/state"
-  }
 }
 
 provider "google" {
-  project = "ringsatranarvi"
-  region = "europe-west3"
+  project = var.project_id
+  region = var.default_region
 }
 
 # ==========================================
@@ -47,7 +42,7 @@ resource "random_password" "db_password" {
 # ==========================================
 
 resource "google_secret_manager_secret" "db_password" {
-  secret_id = "neon-db-password"
+  secret_id = "${var.environment}-neon-db-password"
   replication {
     auto {}
   }
@@ -70,8 +65,8 @@ resource "google_secret_manager_secret" "ai_api_key" {
 # ==========================================
 
 resource "google_cloud_run_v2_service" "backend" {
-  name = "backend-service"
-  location = "europe-west3"
+  name = "${var.environment}-backend-service"
+  location = var.backend_location
 
   template {
     service_account = data.google_service_account.sa_account.email
@@ -81,8 +76,8 @@ resource "google_cloud_run_v2_service" "backend" {
 
       resources {
         limits = {
-          memory = "512Mi"
-          cpu    = "1"
+          memory = var.cloud_run_memory
+          cpu    = var.cloud_run_cpu
         }
       }
 
@@ -113,26 +108,11 @@ resource "google_cloud_run_v2_service_iam_binding" "public_acess" {
 }
 
 data "google_service_account" "sa_account" {
-  account_id = "ringsatranarvi-default"
+  account_id = var.service_account_id
 }
 
 resource "google_secret_manager_secret_iam_member" "allow_cloud_run_db" {
   secret_id = google_secret_manager_secret.db_password.secret_id
   role      = "roles/secretmanager.secretAccessor"
   member   = "serviceAccount:${data.google_service_account.sa_account.email}"
-}
-
-# ==========================================
-# OUTPUTS (ATT KOPIERA TILL NEON)
-# ==========================================
-
-output "GENERATED_NEON_USERNAME" {
-  value       = "app_user_${random_string.db_username.result}"
-  description = "NEON username"
-}
-
-output "GENERATED_NEON_PASSWORD" {
-  value       = random_password.db_password.result
-  sensitive   = true
-  description = "NEON password"
 }
