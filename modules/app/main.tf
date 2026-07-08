@@ -53,7 +53,7 @@ resource "google_secret_manager_secret_version" "db_password_val" {
 }
 
 resource "google_secret_manager_secret" "ai_api_key" {
-  secret_id = "ai-api-key"
+  secret_id = "${var.environment}-ai-api-key"
   replication {
     auto {}
   }
@@ -89,6 +89,15 @@ resource "google_cloud_run_v2_service" "backend" {
         value_source {
           secret_key_ref {
             secret = google_secret_manager_secret.db_password.id
+            version = "latest"
+          }
+        }
+      }
+      env {
+        name  = "AI_API_KEY"
+        value_source {
+          secret_key_ref {
+            secret = google_secret_manager_secret.ai_api_key.id
             version = "latest"
           }
         }
