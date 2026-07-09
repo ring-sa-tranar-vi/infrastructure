@@ -140,7 +140,7 @@ resource "google_firebase_project" "default" {
 resource "google_firebase_hosting_site" "frontend" {
   provider   = google-beta
   project    = var.project_id
-  site_id    = "${var.environment}-frontend-app"
+  site_id    = "${var.environment}-${var.project_id}-app"
   depends_on = [google_firebase_project.default]
 }
 
