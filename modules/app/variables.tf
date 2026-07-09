@@ -39,3 +39,8 @@ variable "service_account_id" {
   type        = string
   default     = "ringsatranarvi-default"
 }
+
+variable "db_url" {
+  description = "Database URL"
+  type        = string
+}
