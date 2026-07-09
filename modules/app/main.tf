@@ -101,6 +101,10 @@ resource "google_cloud_run_v2_service" "backend" {
           }
         }
       }
+      env {
+        name = "SPRING_DATASOURCE_DRIVER_CLASS_NAME"
+        value = "org.postgresql.Driver"
+      }
     }
   }
 }
