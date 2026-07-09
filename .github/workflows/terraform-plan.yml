@@ -8,7 +8,7 @@ on:
 
 jobs:
   plan-staging:
-    name: "Terraform Plan"
+    name: "Terraform Plan Staging"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -33,7 +33,7 @@ jobs:
         run: terraform plan
 
   plan-prod:
-    name: "Terraform Plan"
+    name: "Terraform Plan Prod"
     runs-on: ubuntu-latest
     defaults:
       run:
