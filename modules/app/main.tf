@@ -53,7 +53,7 @@ resource "google_secret_manager_secret_version" "db_password_val" {
 }
 
 resource "google_secret_manager_secret" "ai_api_key" {
-  secret_id = "${var.environment}-ai-api-key"
+  secret_id = "gemini-api-key"
   replication {
     auto {}
   }
@@ -112,6 +112,10 @@ resource "google_cloud_run_v2_service" "backend" {
       env {
         name = "GRAFANA_OTLP_AUTH"
         value = var.grafana_otlp_auth
+      }
+      env {
+        name = "CLERK_JWT_ISSUER_URI"
+        value = var.clerk_jwt_issuer_uri
       }
     }
   }

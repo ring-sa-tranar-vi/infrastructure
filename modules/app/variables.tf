@@ -56,3 +56,9 @@ variable "grafana_otlp_auth" {
   type        = string
   sensitive   = true
 }
+
+variable "clerk_jwt_issuer_uri" {
+  description = "Clerk JWT Issuer URI"
+  type        = string
+  sensitive   = true
+}
