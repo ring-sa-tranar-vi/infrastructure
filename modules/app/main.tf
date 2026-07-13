@@ -101,6 +101,18 @@ resource "google_cloud_run_v2_service" "backend" {
         name = "SPRING_DATASOURCE_DRIVER_CLASS_NAME"
         value = "org.postgresql.Driver"
       }
+      env {
+          name  = "APP_ENVIRONMENT"
+          value = var.environment
+        }
+      env {
+        name  = "GRAFANA_OTLP_URL"
+        value = var.grafana_otlp_url
+      }
+      env {
+        name = "GRAFANA_OTLP_AUTH"
+        value = var.grafana_otlp_auth
+      }
     }
   }
 }
