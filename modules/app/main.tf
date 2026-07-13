@@ -165,6 +165,7 @@ data "google_service_account" "sa_account" {
   account_id = var.service_account_id
 }
 
+# Allow the Cloud Run service account to access the secrets in Secret Manager
 resource "google_secret_manager_secret_iam_member" "allow_cloud_run_db" {
   secret_id = google_secret_manager_secret.db_password.secret_id
   role      = "roles/secretmanager.secretAccessor"
@@ -179,6 +180,12 @@ resource "google_secret_manager_secret_iam_member" "allow_cloud_run_grafana_otlp
 
 resource "google_secret_manager_secret_iam_member" "allow_cloud_run_grafana_otlp_auth" {
   secret_id = google_secret_manager_secret.grafana_otlp_auth.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${data.google_service_account.sa_account.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "allow_cloud_run_gemini_api_key" {
+  secret_id = google_secret_manager_secret.gemini_api_key.secret_id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${data.google_service_account.sa_account.email}"
 }
