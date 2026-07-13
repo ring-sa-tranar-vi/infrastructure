@@ -52,8 +52,22 @@ resource "google_secret_manager_secret_version" "db_password_val" {
   secret_data = random_password.db_password.result
 }
 
-resource "google_secret_manager_secret" "ai_api_key" {
-  secret_id = "${var.environment}-ai-api-key"
+resource "google_secret_manager_secret" "gemini_api_key" {
+  secret_id = "gemini-api-key"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret" "grafana_otlp_url" {
+  secret_id = "grafana-otlp-url"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret" "grafana_otlp_auth" {
+  secret_id = "grafana-otlp-auth"
   replication {
     auto {}
   }
@@ -107,11 +121,34 @@ resource "google_cloud_run_v2_service" "backend" {
         }
       env {
         name  = "GRAFANA_OTLP_URL"
-        value = var.grafana_otlp_url
+        value_source {
+          secret_key_ref {
+            secret = google_secret_manager_secret.grafana_otlp_url.id
+            version = "latest"
+          }
+        }
       }
       env {
         name = "GRAFANA_OTLP_AUTH"
-        value = var.grafana_otlp_auth
+        value_source {
+          secret_key_ref {
+            secret = google_secret_manager_secret.grafana_otlp_auth.id
+            version = "latest"
+          }
+        }
+      }
+      env {
+        name = "GEMINI_API_KEY"
+        value_source {
+          secret_key_ref {
+            secret = google_secret_manager_secret.gemini_api_key.id
+            version = "latest"
+          }
+        }
+      }
+      env {
+        name = "CLERK_JWT_ISSUER_URI"
+        value = var.clerk_jwt_issuer_uri
       }
     }
   }
@@ -128,8 +165,27 @@ data "google_service_account" "sa_account" {
   account_id = var.service_account_id
 }
 
+# Allow the Cloud Run service account to access the secrets in Secret Manager
 resource "google_secret_manager_secret_iam_member" "allow_cloud_run_db" {
   secret_id = google_secret_manager_secret.db_password.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${data.google_service_account.sa_account.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "allow_cloud_run_grafana_otlp_url" {
+  secret_id = google_secret_manager_secret.grafana_otlp_url.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${data.google_service_account.sa_account.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "allow_cloud_run_grafana_otlp_auth" {
+  secret_id = google_secret_manager_secret.grafana_otlp_auth.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${data.google_service_account.sa_account.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "allow_cloud_run_gemini_api_key" {
+  secret_id = google_secret_manager_secret.gemini_api_key.secret_id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${data.google_service_account.sa_account.email}"
 }
