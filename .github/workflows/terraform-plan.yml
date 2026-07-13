@@ -31,6 +31,9 @@ jobs:
 
       - name: Terraform Plan
         run: terraform plan
+        env:
+          TF_VAR_grafana_otlp_url: ${{ secrets.GRAFANA_OTLP_URL }}
+          TF_VAR_grafana_otlp_auth: ${{ secrets.GRAFANA_OTLP_AUTH }}
 
   plan-prod:
     name: "Terraform Plan Prod"
@@ -56,3 +59,6 @@ jobs:
 
       - name: Terraform Plan
         run: terraform plan
+        env:
+          TF_VAR_grafana_otlp_url: ${{ secrets.GRAFANA_OTLP_URL }}
+          TF_VAR_grafana_otlp_auth: ${{ secrets.GRAFANA_OTLP_AUTH }}
