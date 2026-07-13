@@ -59,6 +59,20 @@ resource "google_secret_manager_secret" "ai_api_key" {
   }
 }
 
+resource "google_secret_manager_secret" "grafana_otlp_url" {
+  secret_id = "grafana-otlp-url"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret" "grafana_otlp_auth" {
+  secret_id = "grafana-otlp-auth"
+  replication {
+    auto {}
+  }
+}
+
 # ==========================================
 # CLOUD RUN SERVICE
 # ==========================================
@@ -107,11 +121,21 @@ resource "google_cloud_run_v2_service" "backend" {
         }
       env {
         name  = "GRAFANA_OTLP_URL"
-        value = var.grafana_otlp_url
+        value_source {
+          secret_key_ref {
+            secret = google_secret_manager_secret.grafana_otlp_url.id
+            version = "latest"
+          }
+        }
       }
       env {
         name = "GRAFANA_OTLP_AUTH"
-        value = var.grafana_otlp_auth
+        value_source {
+          secret_key_ref {
+            secret = google_secret_manager_secret.grafana_otlp_auth.id
+            version = "latest"
+          }
+        }
       }
       env {
         name = "CLERK_JWT_ISSUER_URI"
