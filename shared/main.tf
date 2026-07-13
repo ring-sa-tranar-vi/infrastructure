@@ -40,8 +40,8 @@ data "google_service_account" "sa_account" {
 
 resource "google_storage_bucket_iam_member" "allow_service_account_access" {
   bucket = google_storage_bucket.files.name
-  role   = "roles/storage.objectAdmin"
-  member = "serviceAccount:${google_service_account.sa_account.email}"
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${data.google_service_account.sa_account.email}"
 }
 
 resource "google_storage_bucket_object" "folders" {
