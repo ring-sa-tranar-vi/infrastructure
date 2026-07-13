@@ -59,6 +59,13 @@ resource "google_secret_manager_secret" "gemini_api_key" {
   }
 }
 
+resource "google_secret_manager_secret" "openai_api_key" {
+  secret_id = "openai-api-key"
+  replication {
+    auto {}
+  }
+}
+
 resource "google_secret_manager_secret" "grafana_otlp_url" {
   secret_id = "grafana-otlp-url"
   replication {
@@ -142,6 +149,15 @@ resource "google_cloud_run_v2_service" "backend" {
         value_source {
           secret_key_ref {
             secret = google_secret_manager_secret.gemini_api_key.id
+            version = "latest"
+          }
+        }
+      }
+      env {
+        name = "OPENAI_API_KEY"
+        value_source {
+          secret_key_ref {
+            secret = google_secret_manager_secret.openai_api_key.id
             version = "latest"
           }
         }
