@@ -59,10 +59,28 @@ resource "google_secret_manager_secret" "gemini_api_key" {
   }
 }
 
+resource "google_secret_manager_secret_version" "gemini_api_key_initial" {
+  secret      = google_secret_manager_secret.gemini_api_key.id
+  secret_data = "placeholder-gemini-api-key"
+
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
+}
+
 resource "google_secret_manager_secret" "openai_api_key" {
   secret_id = "openai-api-key"
   replication {
     auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "openai_api_key_initial" {
+  secret      = google_secret_manager_secret.openai_api_key.id
+  secret_data = "placeholder-openai-api-key"
+
+  lifecycle {
+    ignore_changes = [secret_data]
   }
 }
 
@@ -73,10 +91,28 @@ resource "google_secret_manager_secret" "grafana_otlp_url" {
   }
 }
 
+resource "google_secret_manager_secret_version" "grafana_otlp_url_initial" {
+  secret      = google_secret_manager_secret.grafana_otlp_url.id
+  secret_data = "placeholder-grafana-otlp-url"
+
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
+}
+
 resource "google_secret_manager_secret" "grafana_otlp_auth" {
   secret_id = "grafana-otlp-auth"
   replication {
     auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "grafana_otlp_auth_initial" {
+  secret      = google_secret_manager_secret.grafana_otlp_auth.id
+  secret_data = "placeholder-grafana-otlp-auth"
+
+  lifecycle {
+    ignore_changes = [secret_data]
   }
 }
 
