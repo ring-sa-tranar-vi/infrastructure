@@ -52,7 +52,7 @@ resource "google_secret_manager_secret_version" "db_password_val" {
   secret_data = random_password.db_password.result
 }
 
-resource "google_secret_manager_secret" "ai_api_key" {
+resource "google_secret_manager_secret" "gemini_api_key" {
   secret_id = "gemini-api-key"
   replication {
     auto {}
@@ -133,6 +133,15 @@ resource "google_cloud_run_v2_service" "backend" {
         value_source {
           secret_key_ref {
             secret = google_secret_manager_secret.grafana_otlp_auth.id
+            version = "latest"
+          }
+        }
+      }
+      env {
+        name = "GEMINI_API_KEY"
+        value_source {
+          secret_key_ref {
+            secret = google_secret_manager_secret.gemini_api_key.id
             version = "latest"
           }
         }
