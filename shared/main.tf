@@ -49,7 +49,7 @@ resource "google_storage_bucket_object" "folders" {
   for_each = toset(["audio/", "images/", "videos/"])
   name     = each.value
   bucket   = google_storage_bucket.files.name
-  content  = ""
+  content  = " "
 }
 
 # ==========================================
