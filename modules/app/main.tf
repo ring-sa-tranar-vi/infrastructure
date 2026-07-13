@@ -171,6 +171,12 @@ resource "google_secret_manager_secret_iam_member" "allow_cloud_run_db" {
   member    = "serviceAccount:${data.google_service_account.sa_account.email}"
 }
 
+resource "google_secret_manager_secret_iam_member" "allow_cloud_run_grafana_otlp_url" {
+  secret_id = google_secret_manager_secret.grafana_otlp_url.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${data.google_service_account.sa_account.email}"
+}
+
 # ==========================================
 # FRONTEND FIREBASE HOSTING
 # ==========================================
