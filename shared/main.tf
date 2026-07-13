@@ -34,9 +34,8 @@ resource "google_storage_bucket" "files" {
   uniform_bucket_level_access = true
 }
 
-resource "google_service_account" "sa_account" {
+data "google_service_account" "sa_account" {
   account_id   = var.service_account_id
-  display_name = "Ringsatranarvi Service Account"
 }
 
 resource "google_storage_bucket_iam_member" "allow_service_account_access" {
