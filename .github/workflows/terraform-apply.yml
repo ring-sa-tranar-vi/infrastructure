@@ -57,3 +57,6 @@ jobs:
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
+        env:
+          TF_VAR_grafana_otlp_url: ${{ secrets.GRAFANA_OTLP_URL }}
+          TF_VAR_grafana_otlp_auth: ${{ secrets.GRAFANA_OTLP_AUTH }}
