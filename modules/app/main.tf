@@ -116,6 +116,22 @@ resource "google_secret_manager_secret_version" "grafana_otlp_auth_initial" {
   }
 }
 
+resource "google_secret_manager_secret" "grafana_otlp_headers"  {
+  secret_id = "grafana-otlp-headers"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "grafana_otlp_headers_initial" {
+  secret      = google_secret_manager_secret.grafana_otlp_headers.id
+  secret_data = "placeholder-grafana-otlp-headers"
+
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
+}
+
 # ==========================================
 # CLOUD RUN SERVICE
 # ==========================================
@@ -181,6 +197,15 @@ resource "google_cloud_run_v2_service" "backend" {
         }
       }
       env {
+        name = "OTEL_EXPORTER_OTLP_HEADERS"
+        value_source {
+          secret_key_ref {
+            secret = google_secret_manager_secret.grafana_otlp_headers.id
+            version = "latest"
+          }
+        }
+      }
+      env {
         name = "GEMINI_API_KEY"
         value_source {
           secret_key_ref {
@@ -238,6 +263,12 @@ resource "google_secret_manager_secret_iam_member" "allow_cloud_run_grafana_otlp
 
 resource "google_secret_manager_secret_iam_member" "allow_cloud_run_gemini_api_key" {
   secret_id = google_secret_manager_secret.gemini_api_key.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${data.google_service_account.sa_account.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "allow_cloud_run_grafana_otlp_headers" {
+  secret_id = google_secret_manager_secret.grafana_otlp_headers.secret_id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${data.google_service_account.sa_account.email}"
 }
