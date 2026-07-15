@@ -132,6 +132,22 @@ resource "google_secret_manager_secret_version" "grafana_otlp_headers_initial" {
   }
 }
 
+resource "google_secret_manager_secret" "grafana_otlp_endpoint"  {
+  secret_id = "grafana-otlp-endpoint"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "grafana_otlp_endpoint_initial" {
+  secret      = google_secret_manager_secret.grafana_otlp_endpoint.id
+  secret_data = "placeholder-grafana-otlp-endpoint"
+
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
+}
+
 # ==========================================
 # CLOUD RUN SERVICE
 # ==========================================
@@ -178,29 +194,38 @@ resource "google_cloud_run_v2_service" "backend" {
           name  = "APP_ENVIRONMENT"
           value = var.environment
         }
-      env {
-        name  = "GRAFANA_OTLP_URL"
-        value_source {
-          secret_key_ref {
-            secret = google_secret_manager_secret.grafana_otlp_url.id
-            version = "latest"
-          }
-        }
-      }
-      env {
-        name = "GRAFANA_OTLP_AUTH"
-        value_source {
-          secret_key_ref {
-            secret = google_secret_manager_secret.grafana_otlp_auth.id
-            version = "latest"
-          }
-        }
-      }
+      # env {
+      #   name  = "GRAFANA_OTLP_URL"
+      #   value_source {
+      #     secret_key_ref {
+      #       secret = google_secret_manager_secret.grafana_otlp_url.id
+      #       version = "latest"
+      #     }
+      #   }
+      # }
+      # env {
+      #   name = "GRAFANA_OTLP_AUTH"
+      #   value_source {
+      #     secret_key_ref {
+      #       secret = google_secret_manager_secret.grafana_otlp_auth.id
+      #       version = "latest"
+      #     }
+      #   }
+      # }
       env {
         name = "OTEL_EXPORTER_OTLP_HEADERS"
         value_source {
           secret_key_ref {
             secret = google_secret_manager_secret.grafana_otlp_headers.id
+            version = "latest"
+          }
+        }
+      }
+      env {
+        name = "OTEL_EXPORTER_OTLP_ENDPOINT"
+        value_source {
+          secret_key_ref {
+            secret = google_secret_manager_secret.grafana_otlp_endpoint.id
             version = "latest"
           }
         }
