@@ -194,42 +194,42 @@ resource "google_cloud_run_v2_service" "backend" {
           name  = "APP_ENVIRONMENT"
           value = var.environment
         }
-      # env {
-      #   name  = "GRAFANA_OTLP_URL"
-      #   value_source {
-      #     secret_key_ref {
-      #       secret = google_secret_manager_secret.grafana_otlp_url.id
-      #       version = "latest"
-      #     }
-      #   }
-      # }
-      # env {
-      #   name = "GRAFANA_OTLP_AUTH"
-      #   value_source {
-      #     secret_key_ref {
-      #       secret = google_secret_manager_secret.grafana_otlp_auth.id
-      #       version = "latest"
-      #     }
-      #   }
-      # }
       env {
-        name = "OTEL_EXPORTER_OTLP_HEADERS"
+        name  = "GRAFANA_OTLP_URL"
         value_source {
           secret_key_ref {
-            secret = google_secret_manager_secret.grafana_otlp_headers.id
+            secret = google_secret_manager_secret.grafana_otlp_url.id
             version = "latest"
           }
         }
       }
       env {
-        name = "OTEL_EXPORTER_OTLP_ENDPOINT"
+        name = "GRAFANA_OTLP_AUTH"
         value_source {
           secret_key_ref {
-            secret = google_secret_manager_secret.grafana_otlp_endpoint.id
+            secret = google_secret_manager_secret.grafana_otlp_auth.id
             version = "latest"
           }
         }
       }
+      # env {
+      #   name = "OTEL_EXPORTER_OTLP_HEADERS"
+      #   value_source {
+      #     secret_key_ref {
+      #       secret = google_secret_manager_secret.grafana_otlp_headers.id
+      #       version = "latest"
+      #     }
+      #   }
+      # }
+      # env {
+      #   name = "OTEL_EXPORTER_OTLP_ENDPOINT"
+      #   value_source {
+      #     secret_key_ref {
+      #       secret = google_secret_manager_secret.grafana_otlp_endpoint.id
+      #       version = "latest"
+      #     }
+      #   }
+      # }
       env {
         name = "GEMINI_API_KEY"
         value_source {
