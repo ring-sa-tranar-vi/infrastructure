@@ -25,31 +25,31 @@ resource "google_artifact_registry_repository" "shared_repo" {
 # CLOUD STORAGE: BUCKET FOR AUDIO FILES
 # ==========================================
 
-resource "google_storage_bucket" "files" {
-  name          = "${var.project_id}-files"
-  project       = var.project_id
-  location      = var.backend_location
-  public_access_prevention = "enforced"
-  force_destroy = false
-  uniform_bucket_level_access = true
-}
+# resource "google_storage_bucket" "files" {
+#   name          = "${var.project_id}-files"
+#   project       = var.project_id
+#   location      = var.default_region
+#   public_access_prevention = "enforced"
+#   force_destroy = false
+#   uniform_bucket_level_access = true
+# }
 
-data "google_service_account" "sa_account" {
-  account_id   = var.service_account_id
-}
+# data "google_service_account" "sa_account" {
+#   account_id   = var.service_account_id
+# }
 
-resource "google_storage_bucket_iam_member" "allow_service_account_access" {
-  bucket = google_storage_bucket.files.name
-  role   = "roles/storage.objectViewer"
-  member = "serviceAccount:${data.google_service_account.sa_account.email}"
-}
+# resource "google_storage_bucket_iam_member" "allow_service_account_access" {
+#   bucket = google_storage_bucket.files.name
+#   role   = "roles/storage.objectViewer"
+#   member = "serviceAccount:${data.google_service_account.sa_account.email}"
+# }
 
-resource "google_storage_bucket_object" "folders" {
-  for_each = toset(["audio/", "images/", "videos/"])
-  name     = each.value
-  bucket   = google_storage_bucket.files.name
-  content  = " "
-}
+# resource "google_storage_bucket_object" "folders" {
+#   for_each = toset(["audio/", "images/", "videos/"])
+#   name     = each.value
+#   bucket   = google_storage_bucket.files.name
+#   content  = " "
+# }
 
 # ==========================================
 # GRAFANA MONITORING SERVICE ACCOUNT
