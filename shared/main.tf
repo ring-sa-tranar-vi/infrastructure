@@ -71,3 +71,39 @@ resource "google_project_iam_member" "grafana_compute_viewer" {
   role    = "roles/compute.viewer"
   member  = "serviceAccount:${google_service_account.grafana_monitoring.email}"
 }
+
+# ==========================================
+# SECRET MANAGER SHARED SECRETS
+# ==========================================
+
+resource "google_secret_manager_secret" "grafana_otlp_url" {
+  secret_id = "grafana-otlp-url"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "grafana_otlp_url_initial" {
+  secret      = google_secret_manager_secret.grafana_otlp_url.id
+  secret_data = "placeholder-grafana-otlp-url"
+
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
+}
+
+resource "google_secret_manager_secret" "grafana_otlp_auth" {
+  secret_id = "grafana-otlp-auth"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "grafana_otlp_auth_initial" {
+  secret      = google_secret_manager_secret.grafana_otlp_auth.id
+  secret_data = "placeholder-grafana-otlp-auth"
+
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
+}
