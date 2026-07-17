@@ -88,6 +88,14 @@ resource "google_secret_manager_secret_version" "openai_api_key_initial" {
 # CLOUD RUN SERVICE
 # ==========================================
 
+data "google_secret_manager_secret" "grafana_otlp_url" {
+  secret_id = "grafana-otlp-url"
+}
+
+data "google_secret_manager_secret" "grafana_otlp_auth" {
+  secret_id = "grafana-otlp-auth"
+}
+
 resource "google_cloud_run_v2_service" "backend" {
   name     = "${var.environment}-backend-service"
   location = var.backend_location
@@ -134,7 +142,7 @@ resource "google_cloud_run_v2_service" "backend" {
         name  = "GRAFANA_OTLP_URL"
         value_source {
           secret_key_ref {
-            secret = google_secret_manager_secret.grafana_otlp_url.id
+            secret = data.google_secret_manager_secret.grafana_otlp_url.id
             version = "latest"
           }
         }
@@ -143,7 +151,7 @@ resource "google_cloud_run_v2_service" "backend" {
         name = "GRAFANA_OTLP_AUTH"
         value_source {
           secret_key_ref {
-            secret = google_secret_manager_secret.grafana_otlp_auth.id
+            secret = data.google_secret_manager_secret.grafana_otlp_auth.id
             version = "latest"
           }
         }
