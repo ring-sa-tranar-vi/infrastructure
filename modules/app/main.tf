@@ -218,6 +218,12 @@ resource "google_secret_manager_secret_iam_member" "allow_cloud_run_gemini_api_k
   member    = "serviceAccount:${data.google_service_account.sa_account.email}"
 }
 
+resource "google_secret_manager_secret_iam_member" "allow_cloud_run_openai_api_key" {
+  secret_id = google_secret_manager_secret.openai_api_key.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${data.google_service_account.sa_account.email}"
+}
+
 # ==========================================
 # FRONTEND FIREBASE HOSTING
 # ==========================================
