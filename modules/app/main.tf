@@ -193,6 +193,13 @@ data "google_service_account" "sa_account" {
   account_id = var.service_account_id
 }
 
+# Allow the Cloud Run service to create signed URLs
+resource "google_project_iam_member" "token_creator" {
+  project = var.project_id
+  role    = "roles/iam.serviceAccountTokenCreator"
+  member  = "serviceAccount:${data.google_service_account.sa_account.email}"
+}
+
 # Allow the Cloud Run service account to access the secrets in Secret Manager
 resource "google_secret_manager_secret_iam_member" "allow_cloud_run_db" {
   secret_id = google_secret_manager_secret.db_password.secret_id
