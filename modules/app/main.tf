@@ -53,7 +53,7 @@ resource "google_secret_manager_secret_version" "db_password_val" {
 }
 
 resource "google_secret_manager_secret" "gemini_api_key" {
-  secret_id = "gemini-api-key"
+  secret_id = "${var.environment}-gemini-api-key"
   replication {
     auto {}
   }
@@ -69,7 +69,7 @@ resource "google_secret_manager_secret_version" "gemini_api_key_initial" {
 }
 
 resource "google_secret_manager_secret" "openai_api_key" {
-  secret_id = "openai-api-key"
+  secret_id = "${var.environment}-openai-api-key"
   replication {
     auto {}
   }
@@ -84,73 +84,17 @@ resource "google_secret_manager_secret_version" "openai_api_key_initial" {
   }
 }
 
-resource "google_secret_manager_secret" "grafana_otlp_url" {
-  secret_id = "grafana-otlp-url"
-  replication {
-    auto {}
-  }
-}
-
-resource "google_secret_manager_secret_version" "grafana_otlp_url_initial" {
-  secret      = google_secret_manager_secret.grafana_otlp_url.id
-  secret_data = "placeholder-grafana-otlp-url"
-
-  lifecycle {
-    ignore_changes = [secret_data]
-  }
-}
-
-resource "google_secret_manager_secret" "grafana_otlp_auth" {
-  secret_id = "grafana-otlp-auth"
-  replication {
-    auto {}
-  }
-}
-
-resource "google_secret_manager_secret_version" "grafana_otlp_auth_initial" {
-  secret      = google_secret_manager_secret.grafana_otlp_auth.id
-  secret_data = "placeholder-grafana-otlp-auth"
-
-  lifecycle {
-    ignore_changes = [secret_data]
-  }
-}
-
-resource "google_secret_manager_secret" "grafana_otlp_headers"  {
-  secret_id = "grafana-otlp-headers"
-  replication {
-    auto {}
-  }
-}
-
-resource "google_secret_manager_secret_version" "grafana_otlp_headers_initial" {
-  secret      = google_secret_manager_secret.grafana_otlp_headers.id
-  secret_data = "placeholder-grafana-otlp-headers"
-
-  lifecycle {
-    ignore_changes = [secret_data]
-  }
-}
-
-resource "google_secret_manager_secret" "grafana_otlp_endpoint"  {
-  secret_id = "grafana-otlp-endpoint"
-  replication {
-    auto {}
-  }
-}
-
-resource "google_secret_manager_secret_version" "grafana_otlp_endpoint_initial" {
-  secret      = google_secret_manager_secret.grafana_otlp_endpoint.id
-  secret_data = "placeholder-grafana-otlp-endpoint"
-
-  lifecycle {
-    ignore_changes = [secret_data]
-  }
-}
-
 # ==========================================
 # CLOUD RUN SERVICE
 # ==========================================
+
+data "google_secret_manager_secret" "grafana_otlp_url" {
+  secret_id = "grafana-otlp-url"
+}
+
+data "google_secret_manager_secret" "grafana_otlp_auth" {
+  secret_id = "grafana-otlp-auth"
+}
 
 resource "google_cloud_run_v2_service" "backend" {
   name     = "${var.environment}-backend-service"
@@ -198,7 +142,7 @@ resource "google_cloud_run_v2_service" "backend" {
         name  = "GRAFANA_OTLP_URL"
         value_source {
           secret_key_ref {
-            secret = google_secret_manager_secret.grafana_otlp_url.id
+            secret = data.google_secret_manager_secret.grafana_otlp_url.id
             version = "latest"
           }
         }
@@ -207,29 +151,11 @@ resource "google_cloud_run_v2_service" "backend" {
         name = "GRAFANA_OTLP_AUTH"
         value_source {
           secret_key_ref {
-            secret = google_secret_manager_secret.grafana_otlp_auth.id
+            secret = data.google_secret_manager_secret.grafana_otlp_auth.id
             version = "latest"
           }
         }
       }
-      # env {
-      #   name = "OTEL_EXPORTER_OTLP_HEADERS"
-      #   value_source {
-      #     secret_key_ref {
-      #       secret = google_secret_manager_secret.grafana_otlp_headers.id
-      #       version = "latest"
-      #     }
-      #   }
-      # }
-      # env {
-      #   name = "OTEL_EXPORTER_OTLP_ENDPOINT"
-      #   value_source {
-      #     secret_key_ref {
-      #       secret = google_secret_manager_secret.grafana_otlp_endpoint.id
-      #       version = "latest"
-      #     }
-      #   }
-      # }
       env {
         name = "GEMINI_API_KEY"
         value_source {
@@ -275,13 +201,13 @@ resource "google_secret_manager_secret_iam_member" "allow_cloud_run_db" {
 }
 
 resource "google_secret_manager_secret_iam_member" "allow_cloud_run_grafana_otlp_url" {
-  secret_id = google_secret_manager_secret.grafana_otlp_url.secret_id
+  secret_id = data.google_secret_manager_secret.grafana_otlp_url.secret_id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${data.google_service_account.sa_account.email}"
 }
 
 resource "google_secret_manager_secret_iam_member" "allow_cloud_run_grafana_otlp_auth" {
-  secret_id = google_secret_manager_secret.grafana_otlp_auth.secret_id
+  secret_id = data.google_secret_manager_secret.grafana_otlp_auth.secret_id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${data.google_service_account.sa_account.email}"
 }
@@ -292,8 +218,8 @@ resource "google_secret_manager_secret_iam_member" "allow_cloud_run_gemini_api_k
   member    = "serviceAccount:${data.google_service_account.sa_account.email}"
 }
 
-resource "google_secret_manager_secret_iam_member" "allow_cloud_run_grafana_otlp_headers" {
-  secret_id = google_secret_manager_secret.grafana_otlp_headers.secret_id
+resource "google_secret_manager_secret_iam_member" "allow_cloud_run_openai_api_key" {
+  secret_id = google_secret_manager_secret.openai_api_key.secret_id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${data.google_service_account.sa_account.email}"
 }
