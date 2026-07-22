@@ -21,3 +21,9 @@ variable "service_account_id" {
   type        = string
   default     = "ringsatranarvi-default"
 }
+
+variable "allowed_origins" {
+  description = "List of allowed origins for Storage Bucket CORS configuration"
+  type        = list(string)
+  default     = ["https://staging-ringsatranarvi-app.web.app", "https://prod-ringsatranarvi-app.web.app"]
+}
