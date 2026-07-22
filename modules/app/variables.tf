@@ -50,3 +50,9 @@ variable "clerk_jwt_issuer_uri" {
   type        = string
   sensitive   = true
 }
+
+variable "gcp_storage_bucket_name" {
+  description = "GCP Storage Bucket Name"
+  type        = string
+  default     = "ringsatranarvi-files"
+}

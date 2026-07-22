@@ -178,6 +178,10 @@ resource "google_cloud_run_v2_service" "backend" {
         name = "CLERK_JWT_ISSUER_URI"
         value = var.clerk_jwt_issuer_uri
       }
+      env {
+        name = "GCP_STORAGE_BUCKET_NAME"
+        value = var.gcp_storage_bucket_name
+      }
     }
   }
 }
