@@ -178,6 +178,10 @@ resource "google_cloud_run_v2_service" "backend" {
         name = "CLERK_JWT_ISSUER_URI"
         value = var.clerk_jwt_issuer_uri
       }
+      env {
+        name = "GCP_STORAGE_BUCKET_NAME"
+        value = var.gcp_storage_bucket_name
+      }
     }
   }
 }
@@ -191,6 +195,13 @@ resource "google_cloud_run_v2_service_iam_binding" "public_acess" {
 
 data "google_service_account" "sa_account" {
   account_id = var.service_account_id
+}
+
+# Allow the Cloud Run service to create signed URLs
+resource "google_project_iam_member" "token_creator" {
+  project = var.project_id
+  role    = "roles/iam.serviceAccountTokenCreator"
+  member  = "serviceAccount:${data.google_service_account.sa_account.email}"
 }
 
 # Allow the Cloud Run service account to access the secrets in Secret Manager
