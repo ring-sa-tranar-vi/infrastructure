@@ -32,6 +32,13 @@ resource "google_storage_bucket" "files" {
   public_access_prevention = "enforced"
   force_destroy = false
   uniform_bucket_level_access = true
+
+  cors {
+    origin          = var.allowed_origins
+    method          = ["GET", "HEAD", "OPTIONS"]
+    response_header = ["*"]
+    max_age_seconds = 3600
+  }
 }
 
 data "google_service_account" "sa_account" {
