@@ -56,3 +56,8 @@ variable "gcp_storage_bucket_name" {
   type        = string
   default     = "ringsatranarvi-files"
 }
+
+variable "cors_allowed_origins" {
+  description = "List of allowed origins for Service CORS configuration"
+  type        = list(string)
+}
