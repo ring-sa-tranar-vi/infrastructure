@@ -182,6 +182,10 @@ resource "google_cloud_run_v2_service" "backend" {
         name = "GCP_STORAGE_BUCKET_NAME"
         value = var.gcp_storage_bucket_name
       }
+      env {
+        name = "CORS_ALLOWED_ORIGINS"
+        value = join(",", var.cors_allowed_origins)
+      }
     }
   }
 
