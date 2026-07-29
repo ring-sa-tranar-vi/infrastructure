@@ -27,3 +27,13 @@ variable "allowed_origins" {
   type        = list(string)
   default     = ["https://staging-ringsatranarvi-app.web.app", "https://prod-ringsatranarvi-app.web.app", "http://localhost:5173"]
 }
+
+variable "cors_allowed_origins" {
+  description = "List of allowed origins for CORS configuration"
+  type        = list(string)
+  default     = [
+    "https://staging-ringsatranarvi-app.web.app",
+    "https://prod-ringsatranarvi-app.web.app",
+    "http://localhost:5173"
+  ]
+}
