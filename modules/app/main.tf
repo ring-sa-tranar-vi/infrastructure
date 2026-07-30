@@ -84,6 +84,24 @@ resource "google_secret_manager_secret_version" "openai_api_key_initial" {
   }
 }
 
+resource "google_secret_manager_secret" "firebase_sa_json" {
+  secret_id = "${var.environment}-firebase-service-account"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "firebase_sa_json_val" {
+  secret      = google_secret_manager_secret.firebase_sa_json.id
+  secret_data = var.firebase_service_account_json
+}
+
+resource "google_secret_manager_secret_iam_member" "allow_cloud_run_firebase_sa" {
+  secret_id = google_secret_manager_secret.firebase_sa_json.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${data.google_service_account.sa_account.email}"
+}
+
 # ==========================================
 # CLOUD RUN SERVICE
 # ==========================================
@@ -125,66 +143,77 @@ resource "google_cloud_run_v2_service" "backend" {
         name  = "SPRING_DATASOURCE_PASSWORD"
         value_source {
           secret_key_ref {
-            secret = google_secret_manager_secret.db_password.id
+            secret  = google_secret_manager_secret.db_password.secret_id
             version = "latest"
           }
         }
       }
       env {
-        name = "SPRING_DATASOURCE_DRIVER_CLASS_NAME"
+        name  = "SPRING_DATASOURCE_DRIVER_CLASS_NAME"
         value = "org.postgresql.Driver"
       }
       env {
-          name  = "APP_ENVIRONMENT"
-          value = var.environment
-        }
+        name  = "APP_ENVIRONMENT"
+        value = var.environment
+      }
       env {
         name  = "GRAFANA_OTLP_URL"
         value_source {
           secret_key_ref {
-            secret = data.google_secret_manager_secret.grafana_otlp_url.id
+            secret  = data.google_secret_manager_secret.grafana_otlp_url.secret_id
             version = "latest"
           }
         }
       }
       env {
-        name = "GRAFANA_OTLP_AUTH"
+        name  = "GRAFANA_OTLP_AUTH"
         value_source {
           secret_key_ref {
-            secret = data.google_secret_manager_secret.grafana_otlp_auth.id
+            secret  = data.google_secret_manager_secret.grafana_otlp_auth.secret_id
             version = "latest"
           }
         }
       }
       env {
-        name = "GEMINI_API_KEY"
+        name  = "GEMINI_API_KEY"
         value_source {
           secret_key_ref {
-            secret = google_secret_manager_secret.gemini_api_key.id
+            secret  = google_secret_manager_secret.gemini_api_key.secret_id
             version = "latest"
           }
         }
       }
       env {
-        name = "OPENAI_API_KEY"
+        name  = "OPENAI_API_KEY"
         value_source {
           secret_key_ref {
-            secret = google_secret_manager_secret.openai_api_key.id
+            secret  = google_secret_manager_secret.openai_api_key.secret_id
             version = "latest"
           }
         }
       }
       env {
-        name = "CLERK_JWT_ISSUER_URI"
+        name  = "CLERK_JWT_ISSUER_URI"
         value = var.clerk_jwt_issuer_uri
       }
       env {
-        name = "GCP_STORAGE_BUCKET_NAME"
+        name  = "GCP_STORAGE_BUCKET_NAME"
         value = var.gcp_storage_bucket_name
       }
       env {
-        name = "CORS_ALLOWED_ORIGINS"
+        name  = "CORS_ALLOWED_ORIGINS"
         value = join(",", var.cors_allowed_origins)
+      }
+      
+      # MOVED INSIDE THE CONTAINERS BLOCK:
+      env {
+        name = "FIREBASE_CONFIG_JSON"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.firebase_sa_json.secret_id
+            version = "latest"
+          }
+        }
       }
     }
   }
