@@ -15,6 +15,21 @@ provider "google-beta" {
   region  = "europe-north2"
 }
 
+import {
+  to = module.app.google_secret_manager_secret.db_password
+  id = "projects/49973934534/secrets/prod-neon-db-password"
+}
+
+import {
+  to = module.app.google_secret_manager_secret.gemini_api_key
+  id = "projects/49973934534/secrets/prod-gemini-api-key"
+}
+
+import {
+  to = module.app.google_secret_manager_secret.openai_api_key
+  id = "projects/49973934534/secrets/prod-openai-api-key"
+}
+
 module "app" {
   source      = "../modules/app"
   environment = "prod"
