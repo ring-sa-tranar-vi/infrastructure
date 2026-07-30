@@ -61,3 +61,9 @@ variable "cors_allowed_origins" {
   description = "List of allowed origins for Service CORS configuration"
   type        = list(string)
 }
+
+variable "firebase_service_account_json" {
+  description = "Raw JSON contents of the Firebase Service Account key"
+  type        = string
+  sensitive   = true
+}
