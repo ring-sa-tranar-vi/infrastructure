@@ -9,9 +9,3 @@ variable "clerk_jwt_issuer_uri" {
   type        = string
   sensitive   = true
 }
-
-variable "firebase_service_account_json" {
-  description = "Firebase Service Account JSON"
-  type        = string
-  sensitive   = true
-}
