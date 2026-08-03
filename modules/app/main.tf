@@ -91,15 +91,13 @@ resource "google_secret_manager_secret" "firebase_sa_json" {
   }
 }
 
-resource "google_secret_manager_secret_version" "firebase_sa_json_val" {
+resource "google_secret_manager_secret_version" "firebase_sa_json_initial" {
   secret      = google_secret_manager_secret.firebase_sa_json.id
-  secret_data = var.firebase_service_account_json
-}
+  secret_data = "placeholder-firebase-service-account-json"
 
-resource "google_secret_manager_secret_iam_member" "allow_cloud_run_firebase_sa" {
-  secret_id = google_secret_manager_secret.firebase_sa_json.secret_id
-  role      = "roles/secretmanager.secretAccessor"
-  member    = "serviceAccount:${data.google_service_account.sa_account.email}"
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
 }
 
 # ==========================================
@@ -203,8 +201,6 @@ resource "google_cloud_run_v2_service" "backend" {
         name  = "CORS_ALLOWED_ORIGINS"
         value = join(",", var.cors_allowed_origins)
       }
-      
-      # MOVED INSIDE THE CONTAINERS BLOCK:
       env {
         name = "FIREBASE_CONFIG_JSON"
         value_source {
@@ -269,6 +265,12 @@ resource "google_secret_manager_secret_iam_member" "allow_cloud_run_gemini_api_k
 
 resource "google_secret_manager_secret_iam_member" "allow_cloud_run_openai_api_key" {
   secret_id = google_secret_manager_secret.openai_api_key.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${data.google_service_account.sa_account.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "allow_cloud_run_firebase_sa" {
+  secret_id = google_secret_manager_secret.firebase_sa_json.secret_id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${data.google_service_account.sa_account.email}"
 }
