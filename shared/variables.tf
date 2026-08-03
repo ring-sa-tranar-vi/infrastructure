@@ -37,9 +37,3 @@ variable "cors_allowed_origins" {
     "http://localhost:5173"
   ]
 }
-
-variable "firebase_service_account_json" {
-  description = "Raw JSON contents of the Firebase Service Account key"
-  type        = string
-  sensitive   = true
-}
