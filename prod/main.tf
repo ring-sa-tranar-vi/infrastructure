@@ -21,5 +21,4 @@ module "app" {
   db_url      = "jdbc:postgresql://ep-sweet-unit-as7v1s28-pooler.c-4.eu-central-1.aws.neon.tech/production?sslmode=require&channelBinding=require"
   clerk_jwt_issuer_uri = var.clerk_jwt_issuer_uri
   cors_allowed_origins = ["https://prod-ringsatranarvi-app.web.app"]
-  firebase_service_account_json = var.firebase_service_account_json
 }
